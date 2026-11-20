@@ -1,0 +1,9 @@
+[project]
+name = "agent-attention-bench"
+version = "0.1.0"
+description = "Benchmark: does a session-scoped attention layer help AI agents act on changing data?"
+requires-python = ">=3.11"
+dependencies = ["anthropic>=1.0"]
+
+[tool.uv]
+package = false

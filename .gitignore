@@ -1,0 +1,17 @@
+# secrets
+.env
+**/.env
+*.pem
+# dependencies / builds
+node_modules/
+dist/
+.venv/
+__pycache__/
+# local outputs
+benchmark/results/
+*.log
+*.sqlite
+*.db
+.DS_Store
+
+*.tgz

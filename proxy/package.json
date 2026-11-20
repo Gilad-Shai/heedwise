@@ -1,0 +1,49 @@
+{
+  "name": "heedwise",
+  "version": "0.1.0",
+  "description": "Smart attention for AI agents: watch GitHub PRs and webhook events, and push only the changes that matter into your agent's context (MCP server, Claude Code channels).",
+  "type": "module",
+  "license": "Apache-2.0",
+  "bin": {
+    "heedwise": "dist/server.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "claude-code",
+    "github",
+    "ci",
+    "webhooks",
+    "context-engineering",
+    "agent-infrastructure"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gilad-Shai/heedwise.git"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "node --test test/",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && chmod +x dist/server.js",
+    "check": "npm run typecheck && npm test",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2"
+  }
+}
