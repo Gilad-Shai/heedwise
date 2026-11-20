@@ -1,6 +1,6 @@
 // SQLite-backed attention state (node:sqlite, no extra dependency).
 // Stores ONLY subscriptions and seen event ids. Never secrets, never payloads.
-import { chmodSync, closeSync, existsSync, mkdirSync, openSync } from "node:fs";
+import { closeSync, fchmodSync, mkdirSync, openSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import type { StateStore } from "./engine.ts";
@@ -14,9 +14,14 @@ export class SqliteStore implements StateStore {
   constructor(path: string) {
     if (path !== ":memory:") {
       mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
-      // Create the file with owner-only permissions before SQLite opens it.
-      if (!existsSync(path)) closeSync(openSync(path, "a", 0o600));
-      chmodSync(path, 0o600);
+      // Create (or open) the file with owner-only permissions before SQLite opens it.
+      // One open + fchmod on the same descriptor: no check-then-use race.
+      const fd = openSync(path, "a", 0o600);
+      try {
+        fchmodSync(fd, 0o600);
+      } finally {
+        closeSync(fd);
+      }
     }
     this.#db = new DatabaseSync(path);
     this.#db.exec(`

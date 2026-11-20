@@ -1,7 +1,7 @@
 // Security tests from THREAT_MODEL.md §6 (items 1-3, 5, 6). Webhook tests come with the webhook source.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, statSync, readFileSync } from "node:fs";
+import { closeSync, fstatSync, mkdtempSync, openSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { AttentionEngine, MemoryStore } from "../src/engine.ts";
@@ -92,8 +92,12 @@ test("5/6. SQLite store: owner-only file mode, and no payloads or secrets on dis
   e.watch({ session: "s", source: "github", account: "octo/repo", entity: "pr/1", allowTextFrom: ["alice"] });
   e.ingest(comment("alice", "SECRET_PAYLOAD ghp_abcdefghijklmnopqrstuvwxyz0123456789"));
   store.close();
-  assert.equal(statSync(path).mode & 0o777, 0o600);
-  const raw = readFileSync(path).toString("latin1");
+  // Read mode and contents through one descriptor (no check-then-use race).
+  const fd = openSync(path, "r");
+  const mode = fstatSync(fd).mode & 0o777;
+  const raw = readFileSync(fd).toString("latin1");
+  closeSync(fd);
+  assert.equal(mode, 0o600);
   assert.ok(!raw.includes("SECRET_PAYLOAD"), "event payloads are never persisted");
   assert.ok(!/ghp_[A-Za-z0-9]{20,}/.test(raw));
 });
